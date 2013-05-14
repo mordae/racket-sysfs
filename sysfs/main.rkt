@@ -14,42 +14,53 @@
                  (->* ()
                       (#:base-path path-string?)
                       #:rest (listof path-string?)
-                      (listof path-string?))
-  (map path->string
-       (directory-list
-         (apply build-path base-path path-items))))
+                      (or/c #f (listof path-string?)))
+  (let ((path (apply build-path base-path path-items)))
+    (if (directory-exists? path)
+      (map path->string
+           (directory-list
+             path))
+      #f)))
 
 
 (define/contract (sysfs-list/keys #:base-path (base-path "/sys") . path-items)
                  (->* ()
                       (#:base-path path-string?)
                       #:rest (listof path-string?)
-                      (listof path-string?))
+                      (or/c #f (listof path-string?)))
   (let ((node-path (apply build-path base-path path-items)))
-    (filter (lambda (item)
-              (file-exists? (build-path node-path item)))
-            (map path->string
-                 (directory-list node-path)))))
+    (if (directory-exists? node-path)
+      (filter (lambda (item)
+                (file-exists? (build-path node-path item)))
+              (map path->string
+                   (directory-list node-path)))
+      #f)))
 
 
 (define/contract (sysfs-list/nodes #:base-path (base-path "/sys") . path-items)
                  (->* ()
                       (#:base-path path-string?)
                       #:rest (listof path-string?)
-                      (listof path-string?))
+                      (or/c #f (listof path-string?)))
   (let ((node-path (apply build-path base-path path-items)))
-    (filter (lambda (item)
-              (directory-exists? (build-path node-path item)))
-            (map path->string
-                 (directory-list node-path)))))
+    (if (directory-exists? node-path)
+      (filter (lambda (item)
+                (directory-exists? (build-path node-path item)))
+              (map path->string
+                   (directory-list node-path)))
+      #f)))
 
 
 (define/contract (sysfs-get #:base-path (base-path "/sys") . path-items)
                  (->* ()
                       (#:base-path path-string?)
                       #:rest (listof path-string?)
-                      string?)
-  (string-trim (file->string (apply build-path base-path path-items))))
+                      (or/c #f string?))
+  (let ((path (apply build-path base-path path-items)))
+    (if (file-exists? path)
+      (let ((value (file->string path)))
+        (if (eof-object? value) "" (string-trim value)))
+      #f)))
 
 
 (define/contract (sysfs-set! #:base-path (base-path "/sys")
