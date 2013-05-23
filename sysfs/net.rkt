@@ -163,6 +163,14 @@
   (sysfs-set! "class" "net" bond "bonding" "slaves"
               #:value (string-append "-" slave)))
 
+(define (add-bond name)
+  (sysfs-set! "class" "net" "bonding_masters"
+              #:value (string-append "+" name)))
+
+(define (remove-bond name)
+  (sysfs-set! "class" "net" "bonding_masters"
+              #:value (string-append "-" name)))
+
 (define-named-accessors bond-xmit-hash-policy
                         ("class" "net")
                         ("bonding" "xmit_hash_policy")
