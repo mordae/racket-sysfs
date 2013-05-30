@@ -62,6 +62,9 @@
                         string->number
                         number->string)
 
+(define (interface-physical? name)
+  (and (sysfs-list "class" "net" name "device") #t))
+
 
 ;
 ; Bridges themselves
@@ -69,10 +72,13 @@
 
 (define-named-lister bridges
                      ("class" "net") #:nodes
-                     get-bridge-id)
+                     interface-bridge?)
 
 (define (list-bridge-ports bridge)
   (sysfs-list/nodes "class" "net" bridge "brif"))
+
+(define (interface-bridge? name)
+  (and (get-bridge-id name) #t))
 
 (define-named-accessors bridge-id
                         ("class" "net")
@@ -150,7 +156,10 @@
 
 (define-named-lister bonds
                      ("class" "net") #:nodes
-                     get-bond-xmit-hash-policy)
+                     interface-bond?)
+
+(define (interface-bond? name)
+  (and (get-bond-xmit-hash-policy name) #t))
 
 (define (list-bond-slaves bond)
   (string-split (sysfs-get "class" "net" bond "bonding" "slaves")))
