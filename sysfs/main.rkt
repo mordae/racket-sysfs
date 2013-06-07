@@ -7,7 +7,14 @@
          racket/string
          racket/file)
 
+(require "private/util.rkt")
+
 (provide (all-defined-out))
+
+
+(define-struct/contract (exn:fail:sysfs exn:fail)
+  ((path path-string?))
+  #:transparent)
 
 
 (define/contract (sysfs-list #:base-path (base-path "/sys") . path-items)
@@ -58,9 +65,12 @@
                       (or/c #f string?))
   (let ((path (apply build-path base-path path-items)))
     (if (file-exists? path)
-      (let ((value (file->string path)))
-        (if (eof-object? value) "" (string-trim value)))
-      #f)))
+      (with-handlers ((exn:fail:filesystem:errno?
+        (lambda (exn)
+          (throw exn:fail:sysfs (format "failed to read ~a" path) path))))
+        (let ((value (file->string path)))
+          (if (eof-object? value) "" (string-trim value))))
+        #f)))
 
 
 (define/contract (sysfs-set! #:base-path (base-path "/sys")
@@ -70,8 +80,12 @@
                       (#:base-path path-string?)
                       #:rest (listof path-string?)
                       void?)
-  (display-to-file value (apply build-path base-path path-items)
-                   #:exists 'truncate))
+  (let ((path (apply build-path base-path path-items)))
+    (with-handlers ((exn:fail:filesystem:errno?
+      (lambda (exn)
+        (throw exn:fail:sysfs
+               (format "failed to write ~s to ~a" value path) path))))
+      (display-to-file value path #:exists 'truncate))))
 
 
 ; vim:set ts=2 sw=2 et:
