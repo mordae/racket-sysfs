@@ -11,9 +11,7 @@
 (provide (all-defined-out))
 
 
-;
-; All interface types
-;
+;; All interface types
 
 (define-named-lister interfaces
                      ("class" "net") #:nodes)
@@ -66,9 +64,7 @@
   (and (sysfs-list "class" "net" name "device") #t))
 
 
-;
-; Bridges themselves
-;
+;; Bridges themselves
 
 (define-named-lister bridges
                      ("class" "net") #:nodes
@@ -127,9 +123,7 @@
                         boolean->string)
 
 
-;
-; Bridge ports
-;
+;; Bridge ports
 
 (define-named-accessors bridge-port-hairpin
                         ("class" "net")
@@ -150,9 +144,7 @@
                         number->string)
 
 
-;
-; Bonding masters
-;
+;; Bonding masters
 
 (define-named-lister bonds
                      ("class" "net") #:nodes
