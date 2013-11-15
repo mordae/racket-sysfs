@@ -5,9 +5,8 @@
 
 (require racket/contract
          racket/string
-         racket/file)
-
-(require "private/util.rkt")
+         racket/file
+         throw)
 
 (provide (all-defined-out))
 
@@ -66,8 +65,10 @@
   (let ((path (apply build-path base-path path-items)))
     (if (file-exists? path)
       (with-handlers ((exn:fail:filesystem:errno?
-        (lambda (exn)
-          (throw exn:fail:sysfs (format "failed to read ~a" path) path))))
+                        (lambda (exn)
+                          (throw (exn:fail:sysfs path)
+                                 'sysfs "read failed"
+                                 "path" path))))
         (let ((value (file->string path)))
           (if (eof-object? value) "" (string-trim value))))
         #f)))
@@ -82,9 +83,11 @@
                       void?)
   (let ((path (apply build-path base-path path-items)))
     (with-handlers ((exn:fail:filesystem:errno?
-      (lambda (exn)
-        (throw exn:fail:sysfs
-               (format "failed to write ~s to ~a" value path) path))))
+                      (lambda (exn)
+                        (throw (exn:fail:sysfs path)
+                               'sysfs "write failed"
+                               "path" path
+                               "value" value))))
       (display-to-file value path #:exists 'truncate))))
 
 
