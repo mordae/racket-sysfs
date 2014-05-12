@@ -48,6 +48,14 @@
                      ("operstate")
                      string->symbol)
 
+(define-named-name-getter interface-bonding-master
+                          ("class" "net")
+                          ("master"))
+
+(define-named-name-getter interface-bridge-master
+                          ("class" "net")
+                          ("brport" "bridge"))
+
 (define-named-accessors interface-mtu
                         ("class" "net")
                         ("mtu")

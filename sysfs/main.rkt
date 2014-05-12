@@ -6,6 +6,7 @@
 (require racket/contract
          racket/string
          racket/file
+         racket/list
          throw)
 
 (provide (all-defined-out))
@@ -71,6 +72,23 @@
                                  "path" path))))
         (let ((value (file->string path)))
           (if (eof-object? value) "" (string-trim value))))
+        #f)))
+
+
+(define/contract (sysfs-get-name #:base-path (base-path "/sys") . path-items)
+                 (->* ()
+                      (#:base-path path-string?)
+                      #:rest (listof path-string?)
+                      (or/c #f string?))
+  (let ((path (apply build-path base-path path-items)))
+    (if (or (file-exists? path)
+            (link-exists? path))
+        (with-handlers ((exn:fail:filesystem:errno?
+                          (lambda (exn)
+                            (throw (exn:fail:sysfs path)
+                                   'sysfs "readlink failed"
+                                   "path" path))))
+          (path->string (last (explode-path (resolve-path path)))))
         #f)))
 
 

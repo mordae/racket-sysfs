@@ -30,6 +30,14 @@
              (sysfs-get leading-path ... node-name trailing-path ...)))))))
 
 
+(define-syntax (define-named-name-getter stx)
+  (syntax-case stx ()
+    ((_ name (leading-path ...) (trailing-path ...))
+     (with-syntax ((getter-name (format-id #'name "get-~a" (syntax-e #'name))))
+       #'(define (getter-name node-name)
+           (sysfs-get-name leading-path ... node-name trailing-path ...))))))
+
+
 (define-syntax (define-named-setter stx)
   (syntax-case stx ()
     ((_ name (leading-path ...) (trailing-path ...))
