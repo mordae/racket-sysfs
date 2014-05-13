@@ -162,7 +162,8 @@
   (and (get-bond-xmit-hash-policy name) #t))
 
 (define (list-bond-slaves bond)
-  (string-split (sysfs-get "class" "net" bond "bonding" "slaves")))
+  (let ((slaves (sysfs-get "class" "net" bond "bonding" "slaves")))
+    (if slaves (string-split slaves) null)))
 
 (define (bond-slave-add bond slave)
   (sysfs-set! "class" "net" bond "bonding" "slaves"
