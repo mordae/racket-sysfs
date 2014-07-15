@@ -7,7 +7,7 @@
          racket/string
          racket/file
          racket/list
-         throw)
+         misc1/throw)
 
 (provide (all-defined-out))
 
